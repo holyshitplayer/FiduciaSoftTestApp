@@ -1,0 +1,42 @@
+﻿<div class="container">
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            @if (Model == null)
+            {
+                <h2 class="text-center text-danger mb-3">No weather forecast found for your city</h2>
+            }
+            else
+            {
+                <h2 class="text-center"><b>@Model.City</b> Weather Forecast for Today</h2>
+
+                @if (ViewBag.Warning != null)
+                {
+                    <h3 class="text-center bg-danger text-wrap rounded-1 text-white fw-bold fs-5 p-2">@ViewBag.Warning</h3>
+                }
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Precipitation</th>
+                            <th scope="col">High Temperature</th>
+                            <th scope="col">Low Temperature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@Model.Precipitation</td>
+                            <td>@Model.HighTemperature°</td>
+                            <td>@Model.LowTemperature°</td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+
+            <div class="d-grid d-md-block">
+                <a class="btn btn-primary mx-auto d-block w-50" asp-area="" asp-controller="WeatherForecast" asp-action="Index">Get new Weather Forecast</a>
+            </div>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
