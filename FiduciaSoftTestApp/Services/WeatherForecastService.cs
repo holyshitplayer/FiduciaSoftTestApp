@@ -15,7 +15,7 @@ namespace FiduciaSoftTestApp.Services
             this._apiUrl = configuration["WeatherApi:ApiUrl"];
         }
 
-        public async Task<WeatherForecast?> GetWeatherForecastAsync(string city)
+        public async Task<WeatherForecast> GetWeatherForecastAsync(string city)
         {
             var client = new RestClient(this._apiUrl);
             var request = new RestRequest();
@@ -41,11 +41,9 @@ namespace FiduciaSoftTestApp.Services
 
                     return weatherForecast;
                 }
-
-                throw new FormatException($"Error parsing date from weather forecast: {response.ErrorMessage}");
             }
 
-            return null;
+            throw new FormatException($"Error parsing date from weather forecast: {response.ErrorMessage}");
         }
     }
 }

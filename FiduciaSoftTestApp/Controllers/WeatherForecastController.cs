@@ -2,6 +2,7 @@
 using FiduciaSoftTestApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text;
 
 namespace FiduciaSoftTestApp.Controllers
 {
@@ -46,10 +47,10 @@ namespace FiduciaSoftTestApp.Controllers
                 {
                     if (weatherForecast.Precipitation.ToLower().Contains("rain"))
                     {
-                        if (HasDayPassedSinceLastWarning(weatherForecast.City, this.HttpContext.Session, this._logger))
+                        if (this.HasDayPassedSinceLastWarning(weatherForecast.City))
                         {
                             this.ViewBag.Warning = "Rain is expected today!";
-                            UpdateLastWarningTime(weatherForecast.City, this.HttpContext.Session);
+                            this.UpdateLastWarningTime(weatherForecast.City);
                         }
                     }
 
@@ -78,10 +79,16 @@ namespace FiduciaSoftTestApp.Controllers
             return this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
         }
 
-        private static bool HasDayPassedSinceLastWarning(string city, ISession session, ILogger logger)
+        private bool HasDayPassedSinceLastWarning(string city)
         {
-            var warningInfo = GetWarningInfoFromSession(city, session);
-            if (warningInfo != null && warningInfo.HasValue)
+
+            DateTime? warningInfo = null;
+            if (this.HttpContext.Session.TryGetValue(city, out byte[]? dateBytes) && dateBytes != null)
+            {
+                warningInfo = new DateTime(BitConverter.ToInt64(dateBytes, 0));
+            }
+
+            if (warningInfo != null)
             {
                 return (DateTime.Now - warningInfo.Value).TotalDays >= 1;
             }
@@ -89,19 +96,9 @@ namespace FiduciaSoftTestApp.Controllers
             return true;
         }
 
-        private static void UpdateLastWarningTime(string city, ISession session)
+        private void UpdateLastWarningTime(string city)
         {
-            session.Set(city, BitConverter.GetBytes(DateTime.Now.Ticks));
-        }
-
-        private static DateTime? GetWarningInfoFromSession(string city, ISession session)
-        {
-            if (session.TryGetValue(city, out byte[]? dateBytes) && dateBytes != null)
-            {
-                return new DateTime(BitConverter.ToInt64(dateBytes, 0));
-            }
-
-            return null;
+            this.HttpContext.Session.Set(city, BitConverter.GetBytes(DateTime.Now.Ticks));
         }
     }
 }
